@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plot Cost Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .calculator-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      width: 100%;
+      max-width: 450px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #444;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .input-row .input-group {
+      flex: 1;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .result-container {
+      margin-top: 30px;
+      padding: 24px;
+      background: #f8f9ff;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .result-container.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+      padding-top: 16px;
+      margin-top: 6px;
+    }
+
+    .result-label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .result-value {
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .total-cost {
+      font-size: 24px;
+      color: #667eea;
+    }
+
+    .total-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .info-text {
+      text-align: center;
+      color: #888;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: #f8f9ff;
+      border-radius: 8px;
+    }
+
+    .toggle-label {
+      color: #444;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    .road-input-container {
+      display: none;
+      margin-bottom: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .road-input-container.show {
+      display: block;
+    }
+
+    .road-result {
+      display: none;
+    }
+
+    .road-result.show {
+      display: flex;
+    }
+
+    .side-road-input-container {
+      display: none;
+      margin-bottom: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .side-road-input-container.show {
+      display: block;
+    }
+
+    .corner-box-result {
+      display: none;
+    }
+
+    .corner-box-result.show {
+      display: flex;
+    }
+
+    .broker-input-container {
+      display: none;
+      margin-bottom: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .broker-input-container.show {
+      display: block;
+    }
+
+    .broker-result {
+      display: none;
+    }
+
+    .broker-result.show {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator-container">
+    <h1>Plot Cost Calculator</h1>
+    <p class="subtitle">Calculate your plot cost based on dimensions</p>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label for="length">Length (feet)</label>
+        <input type="number" id="length" placeholder="Enter length" step="0.01" min="0">
+      </div>
+      <div class="input-group">
+        <label for="breadth">Breadth (feet)</label>
+        <input type="number" id="breadth" placeholder="Enter breadth" step="0.01" min="0">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="costPerCent">Cost per Cent (₹ Lakhs)</label>
+      <input type="number" id="costPerCent" placeholder="Enter cost per cent in lakhs" step="0.01" min="0">
+    </div>
+
+    <div class="toggle-container">
+      <span class="toggle-label">Include Road Cost</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="roadToggle" onchange="toggleRoadInput()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="road-input-container" id="roadInputContainer">
+      <div class="input-group">
+        <label for="roadLength">Road Length (feet)</label>
+        <input type="number" id="roadLength" placeholder="e.g., 33" step="0.01" min="0">
+      </div>
+      
+      <div class="toggle-container">
+        <span class="toggle-label">Corner Plot</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="cornerPlotToggle" onchange="toggleSideRoadInput()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div class="side-road-input-container" id="sideRoadInputContainer">
+        <div class="input-group">
+          <label for="sideRoadLength">Side Road Length (feet)</label>
+          <input type="number" id="sideRoadLength" placeholder="e.g., 33" step="0.01" min="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="toggle-container">
+      <span class="toggle-label">Include Broker Commission</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="brokerToggle" onchange="toggleBrokerInput()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="broker-input-container" id="brokerInputContainer">
+      <div class="input-group">
+        <label for="brokerCommission">Broker Commission (%)</label>
+        <input type="number" id="brokerCommission" placeholder="e.g., 2" step="0.01" min="0" max="100">
+      </div>
+    </div>
+
+    <button onclick="calculateCost()">Calculate Cost</button>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-row">
+        <span class="result-label">Plot Area</span>
+        <span class="result-value" id="plotArea">-</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Area in Cents</span>
+        <span class="result-value" id="areaInCents">-</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Cost per Cent</span>
+        <span class="result-value" id="displayCostPerCent">-</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Plot Cost</span>
+        <span class="result-value" id="plotCost">-</span>
+      </div>
+      <div class="result-row road-result" id="roadResultRow">
+        <span class="result-label">Road Area</span>
+        <span class="result-value" id="roadArea">-</span>
+      </div>
+      <div class="result-row road-result" id="roadCostRow">
+        <span class="result-label">Road Cost</span>
+        <span class="result-value" id="roadCost">-</span>
+      </div>
+      <div class="result-row corner-box-result" id="cornerBoxRow">
+        <span class="result-label">Corner Road Box Area</span>
+        <span class="result-value" id="cornerBoxArea">-</span>
+      </div>
+      <div class="result-row corner-box-result" id="cornerBoxCostRow">
+        <span class="result-label">Corner Road Box Cost</span>
+        <span class="result-value" id="cornerBoxCost">-</span>
+      </div>
+      <div class="result-row road-result" id="totalRoadCostRow">
+        <span class="result-label">Total Road Cost</span>
+        <span class="result-value" id="totalRoadCost">-</span>
+      </div>
+      <div class="result-row broker-result" id="brokerCommissionRow">
+        <span class="result-label">Broker Commission</span>
+        <span class="result-value" id="brokerCommissionAmount">-</span>
+      </div>
+      <div class="result-row">
+        <span class="total-label">Total Cost</span>
+        <span class="result-value total-cost" id="totalCost">-</span>
+      </div>
+    </div>
+
+    <p class="info-text">1 Cent = 435.56 Square Feet</p>
+  </div>
+
+  <script>
+    const SQFT_PER_CENT = 435.56;
+
+    function toggleRoadInput() {
+      const roadToggle = document.getElementById('roadToggle');
+      const roadInputContainer = document.getElementById('roadInputContainer');
+      
+      if (roadToggle.checked) {
+        roadInputContainer.classList.add('show');
+      } else {
+        roadInputContainer.classList.remove('show');
+        document.getElementById('roadLength').value = '';
+        document.getElementById('cornerPlotToggle').checked = false;
+        document.getElementById('sideRoadLength').value = '';
+        document.getElementById('sideRoadInputContainer').classList.remove('show');
+      }
+    }
+
+    function toggleSideRoadInput() {
+      const cornerPlotToggle = document.getElementById('cornerPlotToggle');
+      const sideRoadInputContainer = document.getElementById('sideRoadInputContainer');
+      
+      if (cornerPlotToggle.checked) {
+        sideRoadInputContainer.classList.add('show');
+      } else {
+        sideRoadInputContainer.classList.remove('show');
+        document.getElementById('sideRoadLength').value = '';
+      }
+    }
+
+    function toggleBrokerInput() {
+      const brokerToggle = document.getElementById('brokerToggle');
+      const brokerInputContainer = document.getElementById('brokerInputContainer');
+      
+      if (brokerToggle.checked) {
+        brokerInputContainer.classList.add('show');
+      } else {
+        brokerInputContainer.classList.remove('show');
+        document.getElementById('brokerCommission').value = '';
+      }
+    }
+
+    function calculateCost() {
+      const length = parseFloat(document.getElementById('length').value);
+      const breadth = parseFloat(document.getElementById('breadth').value);
+      const costPerCentLakhs = parseFloat(document.getElementById('costPerCent').value);
+      const costPerCent = costPerCentLakhs * 100000;
+      const includeRoad = document.getElementById('roadToggle').checked;
+      const roadLength = parseFloat(document.getElementById('roadLength').value);
+      const sideRoadLength = parseFloat(document.getElementById('sideRoadLength').value);
+      const includeBroker = document.getElementById('brokerToggle').checked;
+      const brokerCommission = parseFloat(document.getElementById('brokerCommission').value);
+
+      if (isNaN(length) || isNaN(breadth) || isNaN(costPerCentLakhs)) {
+        alert('Please enter valid values for all fields');
+        return;
+      }
+
+      if (length <= 0 || breadth <= 0 || costPerCentLakhs <= 0) {
+        alert('Please enter positive values');
+        return;
+      }
+
+      if (includeRoad && (isNaN(roadLength) || roadLength <= 0)) {
+        alert('Please enter a valid road length');
+        return;
+      }
+
+      if (includeRoad && document.getElementById('cornerPlotToggle').checked && (isNaN(sideRoadLength) || sideRoadLength <= 0)) {
+        alert('Please enter a valid side road length for corner plot');
+        return;
+      }
+
+      if (includeBroker && (isNaN(brokerCommission) || brokerCommission < 0 || brokerCommission > 100)) {
+        alert('Please enter a valid broker commission percentage (0-100)');
+        return;
+      }
+
+      // Calculate plot area in square feet
+      const areaInSqFt = length * breadth;
+
+      // Convert to cents (1 cent = 435.56 sq ft)
+      const areaInCents = areaInSqFt / SQFT_PER_CENT;
+
+      // Calculate plot cost
+      const plotCost = areaInCents * costPerCent;
+
+      // Calculate road cost if enabled
+      // Formula: (roadLength / 2) * breadth / 435.56 * costPerCent
+      // For corner plot: (roadLength / 2) * length / 435.56 * costPerCent
+      let roadAreaSqFt = 0;
+      let roadAreaCents = 0;
+      let roadCostValue = 0;
+      let isCornerPlot = false;
+      
+      // Calculate corner road box cost if corner plot
+      let cornerBoxAreaSqFt = 0;
+      let cornerBoxAreaCents = 0;
+      let cornerBoxCostValue = 0;
+      
+      if (includeRoad) {
+        isCornerPlot = document.getElementById('cornerPlotToggle').checked;
+        if (isCornerPlot) {
+          roadAreaSqFt = (roadLength / 2) * length;
+          
+          // Corner road box calculation: (roadLength / 2) * (sideRoadLength / 2)
+          cornerBoxAreaSqFt = (roadLength / 2) * (sideRoadLength / 2);
+          cornerBoxAreaCents = cornerBoxAreaSqFt / SQFT_PER_CENT;
+          cornerBoxCostValue = cornerBoxAreaCents * costPerCent;
+        } else {
+          roadAreaSqFt = (roadLength / 2) * breadth;
+        }
+        roadAreaCents = roadAreaSqFt / SQFT_PER_CENT;
+        roadCostValue = roadAreaCents * costPerCent;
+      }
+
+      // Calculate broker commission
+      let brokerCommissionAmount = 0;
+      if (includeBroker) {
+        brokerCommissionAmount = (plotCost + roadCostValue + cornerBoxCostValue) * (brokerCommission / 100);
+      }
+
+      // Calculate total cost
+      const totalCost = plotCost + roadCostValue + cornerBoxCostValue + brokerCommissionAmount;
+
+      // Display results
+      document.getElementById('plotArea').textContent = areaInSqFt.toFixed(2) + ' sq ft';
+      document.getElementById('areaInCents').textContent = areaInCents.toFixed(4) + ' cents';
+      document.getElementById('displayCostPerCent').textContent = '₹' + formatNumber(costPerCentLakhs.toFixed(2)) + ' Lakhs';
+      document.getElementById('plotCost').textContent = '₹' + formatNumber(plotCost.toFixed(2));
+      
+      // Show/hide road results
+      const roadResultRow = document.getElementById('roadResultRow');
+      const roadCostRow = document.getElementById('roadCostRow');
+      
+      if (includeRoad) {
+        roadResultRow.classList.add('show');
+        roadCostRow.classList.add('show');
+        const roadLabel = isCornerPlot ? 'Road Area (Corner Plot)' : 'Road Area';
+        document.getElementById('roadResultRow').querySelector('.result-label').textContent = roadLabel;
+        document.getElementById('roadArea').textContent = roadAreaSqFt.toFixed(2) + ' sq ft (' + roadAreaCents.toFixed(4) + ' cents)' + (isCornerPlot ? ' *' : '');
+        document.getElementById('roadCost').textContent = '₹' + formatNumber(roadCostValue.toFixed(2));
+        
+        // Show/hide corner box results
+        const cornerBoxRow = document.getElementById('cornerBoxRow');
+        const cornerBoxCostRow = document.getElementById('cornerBoxCostRow');
+        const totalRoadCostRow = document.getElementById('totalRoadCostRow');
+        
+        if (isCornerPlot) {
+          cornerBoxRow.classList.add('show');
+          cornerBoxCostRow.classList.add('show');
+          document.getElementById('cornerBoxArea').textContent = cornerBoxAreaSqFt.toFixed(2) + ' sq ft (' + cornerBoxAreaCents.toFixed(4) + ' cents) **';
+          document.getElementById('cornerBoxCost').textContent = '₹' + formatNumber(cornerBoxCostValue.toFixed(2));
+        } else {
+          cornerBoxRow.classList.remove('show');
+          cornerBoxCostRow.classList.remove('show');
+        }
+        
+        // Show total road cost
+        totalRoadCostRow.classList.add('show');
+        const totalRoadCost = roadCostValue + cornerBoxCostValue;
+        document.getElementById('totalRoadCost').textContent = '₹' + formatNumber(totalRoadCost.toFixed(2));
+      } else {
+        roadResultRow.classList.remove('show');
+        roadCostRow.classList.remove('show');
+        document.getElementById('cornerBoxRow').classList.remove('show');
+        document.getElementById('cornerBoxCostRow').classList.remove('show');
+        document.getElementById('totalRoadCostRow').classList.remove('show');
+      }
+      
+      // Show/hide broker commission results
+      const brokerCommissionRow = document.getElementById('brokerCommissionRow');
+      if (includeBroker) {
+        brokerCommissionRow.classList.add('show');
+        document.getElementById('brokerCommissionAmount').textContent = '₹' + formatNumber(brokerCommissionAmount.toFixed(2)) + ' (' + brokerCommission.toFixed(2) + '%)';
+      } else {
+        brokerCommissionRow.classList.remove('show');
+      }
+      
+      document.getElementById('totalCost').textContent = '₹' + formatNumber(totalCost.toFixed(2));
+
+      // Show result container
+      document.getElementById('resultContainer').classList.add('show');
+    }
+
+    function formatNumber(num) {
+      return parseFloat(num).toLocaleString('en-IN');
+    }
+
+    // Allow Enter key to trigger calculation
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          calculateCost();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
