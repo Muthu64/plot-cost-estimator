@@ -280,6 +280,99 @@
     .broker-result.show {
       display: flex;
     }
+
+    .plots-container {
+      margin-bottom: 20px;
+    }
+
+    .plot-section {
+      background: #f8f9ff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 2px solid #e0e0e0;
+      position: relative;
+    }
+
+    .plot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .plot-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 16px;
+      flex: 1;
+    }
+
+    .remove-plot-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s;
+      margin-left: auto;
+    }
+
+    .remove-plot-btn:hover {
+      opacity: 0.7;
+    }
+
+    .remove-plot-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: #ff6b6b;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .add-plot-btn {
+      width: 100%;
+      padding: 14px;
+      background: #51cf66;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-bottom: 20px;
+    }
+
+    .add-plot-btn:hover {
+      background: #40c057;
+    }
+
+    .plot-summary {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .plot-summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+
+    .plot-summary-item .label {
+      color: #888;
+    }
+
+    .plot-summary-item .value {
+      font-weight: 600;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -287,51 +380,9 @@
     <h1>Plot Cost Calculator</h1>
     <p class="subtitle">Calculate your plot cost based on dimensions</p>
 
-    <div class="input-row">
-      <div class="input-group">
-        <label for="length">Length (feet)</label>
-        <input type="number" id="length" placeholder="Enter length" step="0.01" min="0">
-      </div>
-      <div class="input-group">
-        <label for="breadth">Breadth (feet)</label>
-        <input type="number" id="breadth" placeholder="Enter breadth" step="0.01" min="0">
-      </div>
-    </div>
+    <button class="add-plot-btn" onclick="addPlot()">+ Add Plot</button>
 
-    <div class="input-group">
-      <label for="costPerCent">Cost per Cent (₹ Lakhs)</label>
-      <input type="number" id="costPerCent" placeholder="Enter cost per cent in lakhs" step="0.01" min="0">
-    </div>
-
-    <div class="toggle-container">
-      <span class="toggle-label">Include Road Cost</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="roadToggle" onchange="toggleRoadInput()">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-
-    <div class="road-input-container" id="roadInputContainer">
-      <div class="input-group">
-        <label for="roadLength">Road Length (feet)</label>
-        <input type="number" id="roadLength" placeholder="e.g., 33" step="0.01" min="0">
-      </div>
-      
-      <div class="toggle-container">
-        <span class="toggle-label">Corner Plot</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="cornerPlotToggle" onchange="toggleSideRoadInput()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      
-      <div class="side-road-input-container" id="sideRoadInputContainer">
-        <div class="input-group">
-          <label for="sideRoadLength">Side Road Length (feet)</label>
-          <input type="number" id="sideRoadLength" placeholder="e.g., 33" step="0.01" min="0">
-        </div>
-      </div>
-    </div>
+    <div class="plots-container" id="plotsContainer"></div>
 
     <div class="toggle-container">
       <span class="toggle-label">Include Broker Commission</span>
@@ -348,42 +399,30 @@
       </div>
     </div>
 
-    <button onclick="calculateCost()">Calculate Cost</button>
+    <button onclick="calculateCost()">Calculate Total Cost</button>
 
     <div class="result-container" id="resultContainer">
       <div class="result-row">
-        <span class="result-label">Plot Area</span>
-        <span class="result-value" id="plotArea">-</span>
+        <span class="result-label">Total Plots</span>
+        <span class="result-value" id="totalPlotsCount">-</span>
       </div>
       <div class="result-row">
-        <span class="result-label">Area in Cents</span>
-        <span class="result-value" id="areaInCents">-</span>
+        <span class="result-label">Total Plot Area</span>
+        <span class="result-value" id="totalPlotArea">-</span>
       </div>
       <div class="result-row">
-        <span class="result-label">Cost per Cent</span>
-        <span class="result-value" id="displayCostPerCent">-</span>
+        <span class="result-label">Total Area in Cents</span>
+        <span class="result-value" id="totalAreaInCents">-</span>
       </div>
       <div class="result-row">
-        <span class="result-label">Plot Cost</span>
-        <span class="result-value" id="plotCost">-</span>
+        <span class="result-label">Total Road Area</span>
+        <span class="result-value" id="totalRoadArea">-</span>
       </div>
-      <div class="result-row road-result" id="roadResultRow">
-        <span class="result-label">Road Area</span>
-        <span class="result-value" id="roadArea">-</span>
+      <div class="result-row">
+        <span class="result-label">Total Plot Cost</span>
+        <span class="result-value" id="totalPlotCost">-</span>
       </div>
-      <div class="result-row road-result" id="roadCostRow">
-        <span class="result-label">Road Cost</span>
-        <span class="result-value" id="roadCost">-</span>
-      </div>
-      <div class="result-row corner-box-result" id="cornerBoxRow">
-        <span class="result-label">Corner Road Box Area</span>
-        <span class="result-value" id="cornerBoxArea">-</span>
-      </div>
-      <div class="result-row corner-box-result" id="cornerBoxCostRow">
-        <span class="result-label">Corner Road Box Cost</span>
-        <span class="result-value" id="cornerBoxCost">-</span>
-      </div>
-      <div class="result-row road-result" id="totalRoadCostRow">
+      <div class="result-row">
         <span class="result-label">Total Road Cost</span>
         <span class="result-value" id="totalRoadCost">-</span>
       </div>
@@ -392,7 +431,7 @@
         <span class="result-value" id="brokerCommissionAmount">-</span>
       </div>
       <div class="result-row">
-        <span class="total-label">Total Cost</span>
+        <span class="total-label">Total Cost (All Plots)</span>
         <span class="result-value total-cost" id="totalCost">-</span>
       </div>
     </div>
@@ -402,31 +441,146 @@
 
   <script>
     const SQFT_PER_CENT = 435.56;
+    let plotCount = 0;
 
-    function toggleRoadInput() {
-      const roadToggle = document.getElementById('roadToggle');
-      const roadInputContainer = document.getElementById('roadInputContainer');
+    function addPlot() {
+      plotCount++;
+      const plotsContainer = document.getElementById('plotsContainer');
+      
+      const plotSection = document.createElement('div');
+      plotSection.className = 'plot-section';
+      plotSection.id = `plot-${plotCount}`;
+      
+      plotSection.innerHTML = `
+        <div class="plot-header">
+          <span class="plot-title">Plot ${plotCount}</span>
+        </div>
+        
+        <div class="input-row">
+          <div class="input-group">
+            <label for="length-${plotCount}">Length (feet)</label>
+            <input type="number" id="length-${plotCount}" placeholder="Enter length" step="0.01" min="0">
+          </div>
+          <div class="input-group">
+            <label for="breadth-${plotCount}">Breadth (feet)</label>
+            <input type="number" id="breadth-${plotCount}" placeholder="Enter breadth" step="0.01" min="0">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="costPerCent-${plotCount}">Cost per Cent (₹ Lakhs)</label>
+          <input type="number" id="costPerCent-${plotCount}" placeholder="Enter cost per cent in lakhs" step="0.01" min="0">
+        </div>
+
+        <div class="toggle-container">
+          <span class="toggle-label">Include Road Cost</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="roadToggle-${plotCount}" onchange="toggleRoadInput(${plotCount})">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="road-input-container" id="roadInputContainer-${plotCount}">
+          <div class="input-group">
+            <label for="roadLength-${plotCount}">Road Length (feet)</label>
+            <input type="number" id="roadLength-${plotCount}" placeholder="e.g., 33" step="0.01" min="0">
+          </div>
+          
+          <div class="toggle-container">
+            <span class="toggle-label">Corner Plot</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="cornerPlotToggle-${plotCount}" onchange="toggleSideRoadInput(${plotCount})">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="side-road-input-container" id="sideRoadInputContainer-${plotCount}">
+            <div class="input-group">
+              <label for="sideRoadLength-${plotCount}">Side Road Length (feet)</label>
+              <input type="number" id="sideRoadLength-${plotCount}" placeholder="e.g., 33" step="0.01" min="0">
+            </div>
+            
+            <div class="toggle-container">
+              <span class="toggle-label">Include Road Box Cost</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="roadBoxToggle-${plotCount}" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="plot-summary" id="plotSummary-${plotCount}" style="display: none;">
+          <div class="plot-summary-item">
+            <span class="label">Plot Area:</span>
+            <span class="value" id="plotSummaryArea-${plotCount}">-</span>
+          </div>
+          <div class="plot-summary-item">
+            <span class="label">Area in Cents:</span>
+            <span class="value" id="plotSummaryAreaCents-${plotCount}">-</span>
+          </div>
+          <div class="plot-summary-item">
+            <span class="label">Road Area:</span>
+            <span class="value" id="plotSummaryRoadArea-${plotCount}">-</span>
+          </div>
+          <div class="plot-summary-item">
+            <span class="label">Plot Cost:</span>
+            <span class="value" id="plotSummaryCost-${plotCount}">-</span>
+          </div>
+          <div class="plot-summary-item">
+            <span class="label">Road Cost:</span>
+            <span class="value" id="plotSummaryRoadCost-${plotCount}">-</span>
+          </div>
+          <div class="plot-summary-item">
+            <span class="label">Total:</span>
+            <span class="value" id="plotSummaryTotal-${plotCount}">-</span>
+          </div>
+        </div>
+      `;
+      
+      plotsContainer.appendChild(plotSection);
+      
+      // Add Enter key listener to new inputs
+      plotSection.querySelectorAll('input').forEach(input => {
+        input.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            calculateCost();
+          }
+        });
+      });
+    }
+
+    function removePlot(id) {
+      const plotElement = document.getElementById(`plot-${id}`);
+      if (plotElement) {
+        plotElement.remove();
+      }
+    }
+
+    function toggleRoadInput(plotId) {
+      const roadToggle = document.getElementById(`roadToggle-${plotId}`);
+      const roadInputContainer = document.getElementById(`roadInputContainer-${plotId}`);
       
       if (roadToggle.checked) {
         roadInputContainer.classList.add('show');
       } else {
         roadInputContainer.classList.remove('show');
-        document.getElementById('roadLength').value = '';
-        document.getElementById('cornerPlotToggle').checked = false;
-        document.getElementById('sideRoadLength').value = '';
-        document.getElementById('sideRoadInputContainer').classList.remove('show');
+        document.getElementById(`roadLength-${plotId}`).value = '';
+        document.getElementById(`cornerPlotToggle-${plotId}`).checked = false;
+        document.getElementById(`sideRoadLength-${plotId}`).value = '';
+        document.getElementById(`sideRoadInputContainer-${plotId}`).classList.remove('show');
       }
     }
 
-    function toggleSideRoadInput() {
-      const cornerPlotToggle = document.getElementById('cornerPlotToggle');
-      const sideRoadInputContainer = document.getElementById('sideRoadInputContainer');
+    function toggleSideRoadInput(plotId) {
+      const cornerPlotToggle = document.getElementById(`cornerPlotToggle-${plotId}`);
+      const sideRoadInputContainer = document.getElementById(`sideRoadInputContainer-${plotId}`);
       
       if (cornerPlotToggle.checked) {
         sideRoadInputContainer.classList.add('show');
       } else {
         sideRoadInputContainer.classList.remove('show');
-        document.getElementById('sideRoadLength').value = '';
+        document.getElementById(`sideRoadLength-${plotId}`).value = '';
       }
     }
 
@@ -442,161 +596,159 @@
       }
     }
 
-    function calculateCost() {
-      const length = parseFloat(document.getElementById('length').value);
-      const breadth = parseFloat(document.getElementById('breadth').value);
-      const costPerCentLakhs = parseFloat(document.getElementById('costPerCent').value);
+    function calculatePlotCost(plotId) {
+      const length = parseFloat(document.getElementById(`length-${plotId}`).value);
+      const breadth = parseFloat(document.getElementById(`breadth-${plotId}`).value);
+      const costPerCentLakhs = parseFloat(document.getElementById(`costPerCent-${plotId}`).value);
       const costPerCent = costPerCentLakhs * 100000;
-      const includeRoad = document.getElementById('roadToggle').checked;
-      const roadLength = parseFloat(document.getElementById('roadLength').value);
-      const sideRoadLength = parseFloat(document.getElementById('sideRoadLength').value);
-      const includeBroker = document.getElementById('brokerToggle').checked;
-      const brokerCommission = parseFloat(document.getElementById('brokerCommission').value);
+      const includeRoad = document.getElementById(`roadToggle-${plotId}`).checked;
+      const roadLength = parseFloat(document.getElementById(`roadLength-${plotId}`).value);
+      const sideRoadLength = parseFloat(document.getElementById(`sideRoadLength-${plotId}`).value);
 
       if (isNaN(length) || isNaN(breadth) || isNaN(costPerCentLakhs)) {
-        alert('Please enter valid values for all fields');
-        return;
+        throw new Error(`Plot ${plotId}: Please enter valid values for all fields`);
       }
 
       if (length <= 0 || breadth <= 0 || costPerCentLakhs <= 0) {
-        alert('Please enter positive values');
-        return;
+        throw new Error(`Plot ${plotId}: Please enter positive values`);
       }
 
       if (includeRoad && (isNaN(roadLength) || roadLength <= 0)) {
-        alert('Please enter a valid road length');
-        return;
+        throw new Error(`Plot ${plotId}: Please enter a valid road length`);
       }
 
-      if (includeRoad && document.getElementById('cornerPlotToggle').checked && (isNaN(sideRoadLength) || sideRoadLength <= 0)) {
-        alert('Please enter a valid side road length for corner plot');
-        return;
-      }
-
-      if (includeBroker && (isNaN(brokerCommission) || brokerCommission < 0 || brokerCommission > 100)) {
-        alert('Please enter a valid broker commission percentage (0-100)');
-        return;
+      if (includeRoad && document.getElementById(`cornerPlotToggle-${plotId}`).checked && document.getElementById(`roadBoxToggle-${plotId}`).checked && (isNaN(sideRoadLength) || sideRoadLength <= 0)) {
+        throw new Error(`Plot ${plotId}: Please enter a valid side road length for corner plot`);
       }
 
       // Calculate plot area in square feet
       const areaInSqFt = length * breadth;
-
-      // Convert to cents (1 cent = 435.56 sq ft)
       const areaInCents = areaInSqFt / SQFT_PER_CENT;
-
-      // Calculate plot cost
       const plotCost = areaInCents * costPerCent;
 
-      // Calculate road cost if enabled
-      // Formula: (roadLength / 2) * breadth / 435.56 * costPerCent
-      // For corner plot: (roadLength / 2) * length / 435.56 * costPerCent
-      let roadAreaSqFt = 0;
-      let roadAreaCents = 0;
       let roadCostValue = 0;
-      let isCornerPlot = false;
-      
-      // Calculate corner road box cost if corner plot
-      let cornerBoxAreaSqFt = 0;
-      let cornerBoxAreaCents = 0;
       let cornerBoxCostValue = 0;
-      
+      let roadAreaSqFt = 0;
+
       if (includeRoad) {
-        isCornerPlot = document.getElementById('cornerPlotToggle').checked;
+        const isCornerPlot = document.getElementById(`cornerPlotToggle-${plotId}`).checked;
+        const includeRoadBox = document.getElementById(`roadBoxToggle-${plotId}`).checked;
+        
         if (isCornerPlot) {
           roadAreaSqFt = (roadLength / 2) * length;
           
-          // Corner road box calculation: (roadLength / 2) * (sideRoadLength / 2)
-          cornerBoxAreaSqFt = (roadLength / 2) * (sideRoadLength / 2);
-          cornerBoxAreaCents = cornerBoxAreaSqFt / SQFT_PER_CENT;
-          cornerBoxCostValue = cornerBoxAreaCents * costPerCent;
+          if (includeRoadBox) {
+            const cornerBoxAreaSqFt = (roadLength / 2) * (sideRoadLength / 2);
+            const cornerBoxAreaCents = cornerBoxAreaSqFt / SQFT_PER_CENT;
+            cornerBoxCostValue = cornerBoxAreaCents * costPerCent;
+          }
         } else {
           roadAreaSqFt = (roadLength / 2) * breadth;
         }
-        roadAreaCents = roadAreaSqFt / SQFT_PER_CENT;
+        const roadAreaCents = roadAreaSqFt / SQFT_PER_CENT;
         roadCostValue = roadAreaCents * costPerCent;
       }
 
-      // Calculate broker commission
-      let brokerCommissionAmount = 0;
-      if (includeBroker) {
-        brokerCommissionAmount = (plotCost + roadCostValue + cornerBoxCostValue) * (brokerCommission / 100);
+      return {
+        plotId,
+        areaInSqFt,
+        areaInCents,
+        roadAreaSqFt,
+        plotCost,
+        roadCost: roadCostValue,
+        cornerBoxCost: cornerBoxCostValue,
+        totalPlotCost: plotCost + roadCostValue + cornerBoxCostValue
+      };
+    }
+
+    function calculateCost() {
+      const plotsContainer = document.getElementById('plotsContainer');
+      const plotElements = plotsContainer.querySelectorAll('.plot-section');
+
+      if (plotElements.length === 0) {
+        alert('Please add at least one plot');
+        return;
       }
 
-      // Calculate total cost
-      const totalCost = plotCost + roadCostValue + cornerBoxCostValue + brokerCommissionAmount;
+      try {
+        let totalPlotsCost = 0;
+        let totalPlotArea = 0;
+        let totalAreaInCents = 0;
+        let totalRoadArea = 0;
+        let totalRoadCost = 0;
+        const plotsResults = [];
 
-      // Display results
-      document.getElementById('plotArea').textContent = areaInSqFt.toFixed(2) + ' sq ft';
-      document.getElementById('areaInCents').textContent = areaInCents.toFixed(4) + ' cents';
-      document.getElementById('displayCostPerCent').textContent = '₹' + formatNumber(costPerCentLakhs.toFixed(2)) + ' Lakhs';
-      document.getElementById('plotCost').textContent = '₹' + formatNumber(plotCost.toFixed(2));
-      
-      // Show/hide road results
-      const roadResultRow = document.getElementById('roadResultRow');
-      const roadCostRow = document.getElementById('roadCostRow');
-      
-      if (includeRoad) {
-        roadResultRow.classList.add('show');
-        roadCostRow.classList.add('show');
-        const roadLabel = isCornerPlot ? 'Road Area (Corner Plot)' : 'Road Area';
-        document.getElementById('roadResultRow').querySelector('.result-label').textContent = roadLabel;
-        document.getElementById('roadArea').textContent = roadAreaSqFt.toFixed(2) + ' sq ft (' + roadAreaCents.toFixed(4) + ' cents)' + (isCornerPlot ? ' *' : '');
-        document.getElementById('roadCost').textContent = '₹' + formatNumber(roadCostValue.toFixed(2));
-        
-        // Show/hide corner box results
-        const cornerBoxRow = document.getElementById('cornerBoxRow');
-        const cornerBoxCostRow = document.getElementById('cornerBoxCostRow');
-        const totalRoadCostRow = document.getElementById('totalRoadCostRow');
-        
-        if (isCornerPlot) {
-          cornerBoxRow.classList.add('show');
-          cornerBoxCostRow.classList.add('show');
-          document.getElementById('cornerBoxArea').textContent = cornerBoxAreaSqFt.toFixed(2) + ' sq ft (' + cornerBoxAreaCents.toFixed(4) + ' cents) **';
-          document.getElementById('cornerBoxCost').textContent = '₹' + formatNumber(cornerBoxCostValue.toFixed(2));
-        } else {
-          cornerBoxRow.classList.remove('show');
-          cornerBoxCostRow.classList.remove('show');
+        plotElements.forEach(plotElement => {
+          const plotIdMatch = plotElement.id.match(/plot-(\d+)/);
+          if (plotIdMatch) {
+            const plotId = parseInt(plotIdMatch[1]);
+            const result = calculatePlotCost(plotId);
+            plotsResults.push(result);
+            totalPlotsCost += result.totalPlotCost;
+            totalPlotArea += result.areaInSqFt;
+            totalAreaInCents += result.areaInCents;
+            totalRoadArea += result.roadAreaSqFt;
+            totalRoadCost += result.roadCost + result.cornerBoxCost;
+
+            // Show plot summary
+            const plotSummary = document.getElementById(`plotSummary-${plotId}`);
+            if (plotSummary) {
+              plotSummary.style.display = 'block';
+              document.getElementById(`plotSummaryArea-${plotId}`).textContent = result.areaInSqFt.toFixed(2) + ' sq ft';
+              document.getElementById(`plotSummaryAreaCents-${plotId}`).textContent = result.areaInCents.toFixed(4) + ' cents';
+              document.getElementById(`plotSummaryRoadArea-${plotId}`).textContent = result.roadAreaSqFt.toFixed(2) + ' sq ft';
+              document.getElementById(`plotSummaryCost-${plotId}`).textContent = '₹' + formatNumber(result.plotCost.toFixed(2));
+              document.getElementById(`plotSummaryRoadCost-${plotId}`).textContent = '₹' + formatNumber((result.roadCost + result.cornerBoxCost).toFixed(2));
+              document.getElementById(`plotSummaryTotal-${plotId}`).textContent = '₹' + formatNumber(result.totalPlotCost.toFixed(2));
+            }
+          }
+        });
+
+        const includeBroker = document.getElementById('brokerToggle').checked;
+        const brokerCommission = parseFloat(document.getElementById('brokerCommission').value);
+
+        if (includeBroker && (isNaN(brokerCommission) || brokerCommission < 0 || brokerCommission > 100)) {
+          alert('Please enter a valid broker commission percentage (0-100)');
+          return;
         }
-        
-        // Show total road cost
-        totalRoadCostRow.classList.add('show');
-        const totalRoadCost = roadCostValue + cornerBoxCostValue;
-        document.getElementById('totalRoadCost').textContent = '₹' + formatNumber(totalRoadCost.toFixed(2));
-      } else {
-        roadResultRow.classList.remove('show');
-        roadCostRow.classList.remove('show');
-        document.getElementById('cornerBoxRow').classList.remove('show');
-        document.getElementById('cornerBoxCostRow').classList.remove('show');
-        document.getElementById('totalRoadCostRow').classList.remove('show');
-      }
-      
-      // Show/hide broker commission results
-      const brokerCommissionRow = document.getElementById('brokerCommissionRow');
-      if (includeBroker) {
-        brokerCommissionRow.classList.add('show');
-        document.getElementById('brokerCommissionAmount').textContent = '₹' + formatNumber(brokerCommissionAmount.toFixed(2)) + ' (' + brokerCommission.toFixed(2) + '%)';
-      } else {
-        brokerCommissionRow.classList.remove('show');
-      }
-      
-      document.getElementById('totalCost').textContent = '₹' + formatNumber(totalCost.toFixed(2));
 
-      // Show result container
-      document.getElementById('resultContainer').classList.add('show');
+        let brokerCommissionAmount = 0;
+        if (includeBroker) {
+          brokerCommissionAmount = totalPlotsCost * (brokerCommission / 100);
+        }
+
+        const totalCost = totalPlotsCost + brokerCommissionAmount;
+
+        // Display overall summary
+        document.getElementById('totalPlotsCount').textContent = plotElements.length;
+        document.getElementById('totalPlotArea').textContent = totalPlotArea.toFixed(2) + ' sq ft';
+        document.getElementById('totalAreaInCents').textContent = totalAreaInCents.toFixed(4) + ' cents';
+        document.getElementById('totalRoadArea').textContent = totalRoadArea.toFixed(2) + ' sq ft';
+        document.getElementById('totalPlotCost').textContent = '₹' + formatNumber((totalPlotsCost - totalRoadCost).toFixed(2));
+        document.getElementById('totalRoadCost').textContent = '₹' + formatNumber(totalRoadCost.toFixed(2));
+
+        // Display broker commission
+        const brokerCommissionRow = document.getElementById('brokerCommissionRow');
+        if (includeBroker) {
+          brokerCommissionRow.classList.add('show');
+          document.getElementById('brokerCommissionAmount').textContent = '₹' + formatNumber(brokerCommissionAmount.toFixed(2)) + ' (' + brokerCommission.toFixed(2) + '%)';
+        } else {
+          brokerCommissionRow.classList.remove('show');
+        }
+
+        document.getElementById('totalCost').textContent = '₹' + formatNumber(totalCost.toFixed(2));
+        document.getElementById('resultContainer').classList.add('show');
+      } catch (error) {
+        alert(error.message);
+      }
     }
 
     function formatNumber(num) {
       return parseFloat(num).toLocaleString('en-IN');
     }
 
-    // Allow Enter key to trigger calculation
-    document.querySelectorAll('input').forEach(input => {
-      input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          calculateCost();
-        }
-      });
-    });
+    // Initialize with one plot
+    addPlot();
   </script>
 </body>
 </html>
