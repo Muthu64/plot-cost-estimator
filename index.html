@@ -23,7 +23,7 @@
 
     .calculator-container {
       background: white;
-      border-radius: 16px;
+      border-radius: 0 0 16px 16px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       padding: 40px;
       width: 100%;
@@ -373,14 +373,126 @@
       font-weight: 600;
       color: #333;
     }
+
+    .percentage-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .percentage-input-group {
+      display: flex;
+      gap: 16px;
+    }
+
+    .percentage-input-group .input-group {
+      flex: 1;
+    }
+
+    .percentage-result {
+      margin-top: 30px;
+      padding: 24px;
+      background: #f8f9ff;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .percentage-result.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .percentage-result-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .percentage-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .percentage-result-label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .percentage-result-value {
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 450px;
+      position: relative;
+    }
+
+    .tabs-container {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border-bottom: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 16px 16px 0 0;
+      padding: 0 40px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 16px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #666;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 0;
+    }
+
+    .tab-button:hover {
+      color: #667eea;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .tab-button.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+      min-height: 600px;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
   </style>
 </head>
 <body>
-  <div class="calculator-container">
-    <h1>Plot Cost Calculator</h1>
-    <p class="subtitle">Calculate your plot cost based on dimensions</p>
+  <div class="main-container">
+    <div class="tabs-container">
+      <button class="tab-button active" onclick="switchTab('plot-cost')">Plot Cost Estimator</button>
+      <button class="tab-button" onclick="switchTab('percentage')">Percentage Calculator</button>
+    </div>
 
-    <button class="add-plot-btn" onclick="addPlot()">+ Add Plot</button>
+    <div class="calculator-container">
+      <h1 id="tab-title">Plot Cost Calculator</h1>
+      <p class="subtitle" id="tab-subtitle">Calculate your plot cost based on dimensions</p>
+
+    <!-- Plot Cost Estimator Tab -->
+    <div id="plot-cost" class="tab-content active">
+      <button class="add-plot-btn" onclick="addPlot()">+ Add Plot</button>
 
     <div class="plots-container" id="plotsContainer"></div>
 
@@ -437,11 +549,108 @@
     </div>
 
     <p class="info-text">1 Cent = 435.56 Square Feet</p>
+    </div>
+
+    <!-- Percentage Calculator Tab -->
+    <div id="percentage" class="tab-content">
+      <div class="percentage-inputs">
+        <div class="percentage-input-group">
+          <div class="input-group">
+            <label for="percentageValue">Value</label>
+            <input type="number" id="percentageValue" placeholder="Enter value" step="0.01" min="0">
+          </div>
+          <div class="input-group">
+            <label for="percentagePercent">Percentage (%)</label>
+            <input type="number" id="percentagePercent" placeholder="Enter percentage" step="0.01" min="0" max="100">
+          </div>
+        </div>
+
+        <button onclick="calculatePercentage()">Calculate Percentage</button>
+
+        <div class="percentage-result" id="percentageResult">
+          <div class="percentage-result-item">
+            <span class="percentage-result-label">Original Value</span>
+            <span class="percentage-result-value" id="originalValue">-</span>
+          </div>
+          <div class="percentage-result-item">
+            <span class="percentage-result-label">Percentage</span>
+            <span class="percentage-result-value" id="percentageAmount">-</span>
+          </div>
+          <div class="percentage-result-item">
+            <span class="percentage-result-label">Percentage of Value</span>
+            <span class="percentage-result-value" id="percentageOfValue">-</span>
+          </div>
+          <div class="percentage-result-item">
+            <span class="percentage-result-label">Value + Percentage</span>
+            <span class="percentage-result-value" id="valueWithPercentage">-</span>
+          </div>
+          <div class="percentage-result-item">
+            <span class="percentage-result-label">Value - Percentage</span>
+            <span class="percentage-result-value" id="valueMinusPercentage">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     const SQFT_PER_CENT = 435.56;
     let plotCount = 0;
+
+    function switchTab(tabName) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const buttons = document.querySelectorAll('.tab-button');
+      
+      tabs.forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      buttons.forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+      
+      // Update title and subtitle based on active tab
+      const titleElement = document.getElementById('tab-title');
+      const subtitleElement = document.getElementById('tab-subtitle');
+      
+      if (tabName === 'plot-cost') {
+        titleElement.textContent = 'Plot Cost Calculator';
+        subtitleElement.textContent = 'Calculate your plot cost based on dimensions';
+      } else if (tabName === 'percentage') {
+        titleElement.textContent = 'Percentage Calculator';
+        subtitleElement.textContent = 'Calculate percentages and values';
+      }
+    }
+
+    function calculatePercentage() {
+      const value = parseFloat(document.getElementById('percentageValue').value);
+      const percentage = parseFloat(document.getElementById('percentagePercent').value);
+      
+      if (isNaN(value) || isNaN(percentage)) {
+        alert('Please enter valid values for both fields');
+        return;
+      }
+      
+      if (value < 0 || percentage < 0 || percentage > 100) {
+        alert('Please enter valid positive values (percentage between 0-100)');
+        return;
+      }
+      
+      const percentageAmount = value * (percentage / 100);
+      const valueWithPercentage = value + percentageAmount;
+      const valueMinusPercentage = value - percentageAmount;
+      
+      document.getElementById('originalValue').textContent = formatNumber(value.toFixed(2));
+      document.getElementById('percentageAmount').textContent = percentage.toFixed(2) + '%';
+      document.getElementById('percentageOfValue').textContent = formatNumber(percentageAmount.toFixed(2));
+      document.getElementById('valueWithPercentage').textContent = formatNumber(valueWithPercentage.toFixed(2));
+      document.getElementById('valueMinusPercentage').textContent = formatNumber(valueMinusPercentage.toFixed(2));
+      
+      document.getElementById('percentageResult').classList.add('show');
+    }
 
     function addPlot() {
       plotCount++;
